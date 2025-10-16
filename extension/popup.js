@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'https://api.versan.in'; // Update this when backend is deployed
+const API_URL = 'https://datazen-saas-production.up.railway.app'; // Backend API URL
 const CURRENT_DOMAIN = 'https://versan.in';
 
 // DOM Elements

@@ -1,13 +1,34 @@
 # DataZen SaaS - Deployment Guide
 
+## 🎯 CURRENT STATUS (Updated 2025-10-16)
+
+### ✅ COMPLETED
+- Frontend deployed to Vercel (https://www.versan.in)
+- Domain connected (versan.in)
+- Database created with all tables
+- Subscription plans configured
+- Browser extension created and ready
+
+### 🔄 IN PROGRESS
+- Backend deployment to Railway.app
+- Extension testing and Chrome Web Store submission
+
+### 📋 TODO
+- Backend production deployment
+- Environment variables configuration
+- Extension icons creation
+- Full integration testing
+
+---
+
 ## Pre-Deployment Checklist
 
-- [ ] All tests passing
+- [x] All tests passing
 - [ ] Environment variables configured
 - [ ] Database migrations tested
 - [ ] Razorpay webhook configured
-- [ ] SSL certificate obtained
-- [ ] Domain configured
+- [x] SSL certificate obtained (via Vercel)
+- [x] Domain configured (versan.in)
 - [ ] Backups configured
 - [ ] Monitoring setup
 
@@ -307,6 +328,75 @@ python -c "from config.database import init_db; init_db()"
 - Load balancing
 - Content delivery
 - Database replication
+
+## 🔌 Browser Extension Deployment
+
+### Extension Features
+- Extract text, links, images, emails from any website
+- AI-powered data enhancement
+- Works on current page or any URL
+- Export to CSV/JSON
+- Send data to DataZen dashboard
+
+### Development Setup
+```bash
+# 1. Open Chrome
+# 2. Go to chrome://extensions/
+# 3. Enable "Developer mode"
+# 4. Click "Load unpacked"
+# 5. Select the "extension" folder
+```
+
+### Production Deployment
+
+#### Step 1: Create Extension Icons
+Create 3 PNG files in `extension/images/`:
+- `icon-16.png` (16x16 pixels)
+- `icon-48.png` (48x48 pixels)
+- `icon-128.png` (128x128 pixels)
+
+#### Step 2: Update API URL
+Edit `extension/popup.js`:
+```javascript
+const API_URL = 'https://your-backend-url.com';
+const CURRENT_DOMAIN = 'https://versan.in';
+```
+
+#### Step 3: Package Extension
+```bash
+# Create ZIP file of extension folder
+# Include: manifest.json, popup.html, popup.css, popup.js, content.js, background.js, images/
+```
+
+#### Step 4: Submit to Chrome Web Store
+1. Go to https://chrome.google.com/webstore/developer/dashboard
+2. Click "New item"
+3. Upload extension ZIP
+4. Fill in:
+   - Name: DataZen - Web Scraper
+   - Description: Extract data from websites with AI
+   - Category: Productivity
+   - Language: English
+5. Add screenshots and promotional images
+6. Submit for review (takes 1-3 days)
+
+### Extension File Structure
+```
+extension/
+├── manifest.json       # Extension configuration
+├── popup.html         # Popup UI
+├── popup.css          # Styles
+├── popup.js           # Popup logic
+├── content.js         # Page extraction script
+├── background.js      # Service worker
+├── images/            # Icons
+│   ├── icon-16.png
+│   ├── icon-48.png
+│   └── icon-128.png
+└── README.md          # Documentation
+```
+
+---
 
 ## Maintenance
 

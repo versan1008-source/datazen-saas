@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataZen - Web Scraper</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="icon">🧠</span>
+                <h1>DataZen</h1>
+            </div>
+            <p class="subtitle">AI-Powered Web Scraper</p>
+        </div>
+
+        <div class="content">
+            <div class="url-section">
+                <label for="url">Website URL:</label>
+                <input type="text" id="url" placeholder="https://example.com" />
+            </div>
+
+            <div class="options-section">
+                <label>Extract:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox">
+                        <input type="checkbox" id="extract-text" checked />
+                        <span>Text</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="extract-links" checked />
+                        <span>Links</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="extract-images" />
+                        <span>Images</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="extract-emails" />
+                        <span>Emails</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mode-section">
+                <label class="checkbox">
+                    <input type="checkbox" id="ai-mode" />
+                    <span>Use AI Enhancement</span>
+                </label>
+            </div>
+
+            <button id="scrape-btn" class="scrape-btn">
+                <span class="btn-text">Scrape Current Page</span>
+                <span class="btn-icon">⚡</span>
+            </button>
+
+            <button id="scrape-url-btn" class="scrape-url-btn">
+                <span class="btn-text">Scrape URL</span>
+                <span class="btn-icon">🌐</span>
+            </button>
+        </div>
+
+        <div id="result" class="result hidden">
+            <div class="result-header">
+                <h3>Results</h3>
+                <button id="close-result" class="close-btn">✕</button>
+            </div>
+            <div id="result-content" class="result-content"></div>
+            <div class="result-actions">
+                <button id="copy-btn" class="action-btn">📋 Copy</button>
+                <button id="download-btn" class="action-btn">⬇️ Download</button>
+                <button id="send-btn" class="action-btn">📤 Send to DataZen</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Scraping in progress...</p>
+        </div>
+
+        <div id="error" class="error hidden">
+            <p id="error-message"></p>
+        </div>
+
+        <div class="footer">
+            <a href="https://versan.in" target="_blank">Visit Dashboard</a>
+            <span>•</span>
+            <a href="https://versan.in/docs" target="_blank">API Docs</a>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
+

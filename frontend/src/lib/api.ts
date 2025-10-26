@@ -229,7 +229,7 @@ export const downloadUtils = {
   /**
    * Download data as CSV file
    */
-  downloadCSV(data: any[], filename: string = 'datazen-export.csv') {
+  downloadCSV(data: any[], filename: string = 'datazen-export.csv', dataType?: string) {
     if (!data || data.length === 0) {
       throw new Error('No data to export');
     }
@@ -242,7 +242,15 @@ export const downloadUtils = {
       }
     });
 
-    const headers = Array.from(allKeys);
+    let headers = Array.from(allKeys);
+
+    // For text data, prioritize 'text' column and filter out metadata columns
+    if (dataType === 'text' || filename.includes('text')) {
+      // Put 'text' first if it exists
+      if (headers.includes('text')) {
+        headers = ['text', ...headers.filter(h => h !== 'text')];
+      }
+    }
 
     // Create CSV content
     const csvContent = [

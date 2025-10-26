@@ -110,7 +110,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
       : result.data;
 
     const filename = `datazen-${result.data_type}-${new Date().toISOString().split('T')[0]}.csv`;
-    downloadUtils.downloadCSV(dataToDownload, filename);
+    downloadUtils.downloadCSV(dataToDownload, filename, result.data_type);
   };
 
   // Get enhanced data type badge

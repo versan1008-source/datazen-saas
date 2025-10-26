@@ -144,10 +144,9 @@ class WebScraper:
             text = clean_text(heading.get_text())
             if text:
                 text_elements.append({
+                    'text': text,
                     'type': 'heading',
                     'tag': heading.name,
-                    'text': text,
-                    'length': len(text),
                     'level': int(heading.name[1])
                 })
 
@@ -156,9 +155,8 @@ class WebScraper:
             text = clean_text(para.get_text())
             if text and len(text) > 5:
                 text_elements.append({
-                    'type': 'paragraph',
                     'text': text,
-                    'length': len(text)
+                    'type': 'paragraph'
                 })
 
         # Extract list items
@@ -166,9 +164,8 @@ class WebScraper:
             text = clean_text(li.get_text())
             if text:
                 text_elements.append({
-                    'type': 'list_item',
                     'text': text,
-                    'length': len(text)
+                    'type': 'list_item'
                 })
 
         # Extract div content (main content areas)
@@ -178,9 +175,8 @@ class WebScraper:
                 text = clean_text(div.get_text())
                 if text and len(text) > 10:
                     text_elements.append({
-                        'type': 'content',
                         'text': text,
-                        'length': len(text)
+                        'type': 'content'
                     })
 
         # Extract article content
@@ -188,9 +184,8 @@ class WebScraper:
             text = clean_text(article.get_text())
             if text and len(text) > 20:
                 text_elements.append({
-                    'type': 'article',
                     'text': text,
-                    'length': len(text)
+                    'type': 'article'
                 })
 
         # Extract section content
@@ -198,9 +193,8 @@ class WebScraper:
             text = clean_text(section.get_text())
             if text and len(text) > 15:
                 text_elements.append({
-                    'type': 'section',
                     'text': text,
-                    'length': len(text)
+                    'type': 'section'
                 })
 
         # Extract table content
@@ -209,9 +203,8 @@ class WebScraper:
                 row_text = clean_text(row.get_text())
                 if row_text:
                     text_elements.append({
-                        'type': 'table_row',
                         'text': row_text,
-                        'length': len(row_text)
+                        'type': 'table_row'
                     })
 
         # If we still don't have much content, extract all visible text
@@ -222,9 +215,8 @@ class WebScraper:
                 sentences = [s.strip() for s in all_text.split('.') if s.strip() and len(s.strip()) > 10]
                 for i, sentence in enumerate(sentences[:20]):
                     text_elements.append({
-                        'type': 'sentence',
                         'text': sentence + '.',
-                        'length': len(sentence) + 1,
+                        'type': 'sentence',
                         'order': i + 1
                     })
 

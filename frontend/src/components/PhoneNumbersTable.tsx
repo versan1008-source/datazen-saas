@@ -7,7 +7,6 @@ import {
   FileText,
   ExternalLink,
   ChevronDown,
-  X,
   Phone,
   Building2,
   User,
@@ -43,7 +42,7 @@ const PhoneNumbersTable: React.FC<PhoneNumbersTableProps> = ({ data, onNewScrape
 
   // Filter and sort data
   const filteredData = useMemo(() => {
-    let result = data.filter((item) => {
+    const filtered = data.filter((item) => {
       const matchesSearch =
         item.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.owner.toLowerCase().includes(searchTerm.toLowerCase());
@@ -53,12 +52,10 @@ const PhoneNumbersTable: React.FC<PhoneNumbersTableProps> = ({ data, onNewScrape
 
     // Sort
     if (sortBy === 'confidence') {
-      result.sort((a, b) => b.confidence - a.confidence);
+      return filtered.sort((a, b) => b.confidence - a.confidence);
     } else {
-      result.sort((a, b) => a.phone.localeCompare(b.phone));
+      return filtered.sort((a, b) => a.phone.localeCompare(b.phone));
     }
-
-    return result;
   }, [data, searchTerm, ownerTypeFilter, sortBy]);
 
   const handleSelectAll = () => {

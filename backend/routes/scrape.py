@@ -137,15 +137,10 @@ async def scrape_website(request: ScrapeRequest, background_tasks: BackgroundTas
                 logger.info(f"Fallback scraper successful for {request.url}")
             except Exception as fallback_error:
                 logger.error(f"Both scrapers failed. Playwright: {playwright_error}, Fallback: {fallback_error}")
+                error_detail = f"All scrapers failed. Playwright error: {str(playwright_error)}. Fallback error: {str(fallback_error)}"
                 raise HTTPException(
                     status_code=500,
-                    detail={
-                        "error": "All scrapers failed",
-                        "playwright_error": str(playwright_error),
-                        "fallback_error": str(fallback_error),
-                        "url": request.url,
-                        "processing_time_seconds": (datetime.now() - start_time).total_seconds()
-                    }
+                    detail=error_detail
                 )
             
         # If scraping failed or result is None, return error

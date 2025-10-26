@@ -72,7 +72,8 @@ export default function Home() {
       }, 500);
 
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+      const errorMessage = err?.message || err?.error || (typeof err === 'string' ? err : JSON.stringify(err)) || 'An unexpected error occurred';
+      setError(errorMessage);
       setIsLoading(false);
       setProgress(0);
       setCurrentStep(0);

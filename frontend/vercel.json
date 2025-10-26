@@ -3,12 +3,8 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"],
   "env": {
-    "NEXT_PUBLIC_API_URL": {
-      "description": "Backend API URL",
-      "default": "https://datazen-saas-production.up.railway.app"
-    }
+    "NEXT_PUBLIC_API_URL": "https://datazen-saas-production.up.railway.app"
   },
   "headers": [
     {

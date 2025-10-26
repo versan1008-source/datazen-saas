@@ -363,15 +363,151 @@ class WebScraper:
         
         return email_data
     
-    async def scrape(self, url: str, data_type: str, check_robots: bool = True) -> Dict[str, Any]:
+    def extract_phone_numbers(self, html_content: str, resolve_owner: bool = False) -> List[Dict[str, Any]]:
+        """
+        Extract phone numbers from HTML content
+
+        Args:
+            html_content (str): HTML content to extract from
+            resolve_owner (bool): Whether to attempt owner resolution
+
+        Returns:
+            List[Dict[str, Any]]: List of phone number records
+        """
+        soup = BeautifulSoup(html_content, 'html.parser')
+        phone_numbers = []
+
+        # Phone number regex patterns
+        patterns = [
+            r'\+?1?\s*\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})',  # US format
+            r'\+?[1-9]\d{1,14}',  # International E.164 format
+            r'\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})',  # US without country code
+        ]
+
+        seen_numbers = set()
+
+        # Extract from text content
+        text_content = soup.get_text()
+        for pattern in patterns:
+            matches = re.finditer(pattern, text_content)
+            for match in matches:
+                phone = match.group(0).strip()
+                # Normalize phone number
+                normalized = re.sub(r'[^\d+]', '', phone)
+
+                if normalized not in seen_numbers and len(normalized) >= 10:
+                    seen_numbers.add(normalized)
+
+                    # Get context around the phone number
+                    start = max(0, match.start() - 50)
+                    end = min(len(text_content), match.end() + 50)
+                    context = text_content[start:end].strip()
+
+                    # Extract owner from context if resolve_owner is True
+                    owner = None
+                    owner_type = 'Unknown'
+                    confidence = 50
+
+                    if resolve_owner:
+                        owner, owner_type, confidence = self._resolve_phone_owner(phone, context, soup)
+                    else:
+                        # Try to extract owner from adjacent text
+                        owner = self._extract_owner_from_context(context)
+
+                    phone_numbers.append({
+                        'phone': phone,
+                        'normalized': normalized,
+                        'owner': owner or 'Unknown',
+                        'owner_type': owner_type,
+                        'confidence': confidence,
+                        'source': self._find_phone_selector(soup, phone),
+                        'context_snippet': self._extract_context_snippet(context, phone),
+                        'data_source': 'enriched_lookup' if resolve_owner else 'extracted_from_page'
+                    })
+
+        return phone_numbers
+
+    def _resolve_phone_owner(self, phone: str, context: str, soup: BeautifulSoup) -> tuple:
+        """Attempt to resolve phone owner information"""
+        # This is a placeholder for actual phone lookup service integration
+        # In production, this would call a service like Twilio Lookup API
+        owner = self._extract_owner_from_context(context)
+
+        # Simple heuristic: check if context contains business keywords
+        business_keywords = ['company', 'business', 'corp', 'inc', 'llc', 'ltd', 'phone', 'call', 'contact']
+        person_keywords = ['contact', 'reach', 'call me', 'my number', 'personal']
+
+        owner_type = 'Unknown'
+        confidence = 50
+
+        context_lower = context.lower()
+        if any(keyword in context_lower for keyword in business_keywords):
+            owner_type = 'Business'
+            confidence = 65
+        elif any(keyword in context_lower for keyword in person_keywords):
+            owner_type = 'Person'
+            confidence = 60
+
+        return owner, owner_type, confidence
+
+    def _extract_owner_from_context(self, context: str) -> Optional[str]:
+        """Extract owner name from context text"""
+        # Look for common patterns like "Contact: John Doe" or "Company: ABC Corp"
+        patterns = [
+            r'(?:contact|call|reach|phone)[\s:]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
+            r'(?:company|business|organization)[\s:]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, context, re.IGNORECASE)
+            if match:
+                return match.group(1)
+
+        return None
+
+    def _find_phone_selector(self, soup: BeautifulSoup, phone: str) -> str:
+        """Find CSS selector for phone number element"""
+        # Search for the phone number in the HTML
+        for element in soup.find_all(string=re.compile(re.escape(phone))):
+            parent = element.parent
+            if parent:
+                # Try to build a selector
+                if parent.get('class'):
+                    return f".{'.'.join(parent.get('class', []))}"
+                elif parent.get('id'):
+                    return f"#{parent.get('id')}"
+                else:
+                    return parent.name or 'unknown'
+
+        return 'unknown'
+
+    def _extract_context_snippet(self, context: str, phone: str) -> str:
+        """Extract 3-6 word snippet around phone number"""
+        words = context.split()
+        phone_idx = None
+
+        for i, word in enumerate(words):
+            if phone in word or word in phone:
+                phone_idx = i
+                break
+
+        if phone_idx is not None:
+            start = max(0, phone_idx - 2)
+            end = min(len(words), phone_idx + 3)
+            return ' '.join(words[start:end])
+
+        return ' '.join(words[:6])
+
+    async def scrape(self, url: str, data_type: str, check_robots: bool = True, resolve_owner: bool = False) -> Dict[str, Any]:
         """
         Main scraping method
-        
+
         Args:
             url (str): URL to scrape
-            data_type (str): Type of data to extract (text, images, links, emails)
+            data_type (str): Type of data to extract (text, images, links, emails, phone_numbers)
             check_robots (bool): Whether to check robots.txt
-            
+            resolve_owner (bool): Whether to resolve phone owner information
+
         Returns:
             Dict[str, Any]: Scraping results
         """
@@ -379,14 +515,14 @@ class WebScraper:
             # Validate URL
             if not validate_url(url):
                 raise ValueError("Invalid URL format")
-            
+
             # Check robots.txt if requested
             if check_robots and not check_robots_txt(url):
                 raise ValueError("Scraping not allowed by robots.txt")
-            
+
             # Fetch page content
             html_content, final_url = await self.fetch_page_content(url)
-            
+
             # Extract data based on type
             if data_type == 'text':
                 data = self.extract_text(html_content)
@@ -396,6 +532,8 @@ class WebScraper:
                 data = self.extract_links(html_content, final_url)
             elif data_type == 'emails':
                 data = self.extract_emails_from_html(html_content)
+            elif data_type == 'phone_numbers':
+                data = self.extract_phone_numbers(html_content, resolve_owner)
             else:
                 raise ValueError(f"Unsupported data type: {data_type}")
             

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Brain, Globe, Zap, Shield, Download, Github, ArrowRight, Sparkles } from 'lucide-react';
 import ScrapeForm from '@/components/ScrapeForm';
 import ResultTable from '@/components/ResultTable';
+import PhoneNumbersTable from '@/components/PhoneNumbersTable';
 import Loader, { ProgressSteps } from '@/components/Loader';
 import { apiService, ScrapeRequest, EnhancedScrapeRequest, ScrapeResponse } from '@/lib/api';
 
@@ -278,9 +279,11 @@ export default function Home() {
                 </div>
               )}
 
-              {result && (
+              {result && result.data_type === 'phone_numbers' ? (
+                <PhoneNumbersTable data={result.data} onNewScrape={handleNewScrape} />
+              ) : result ? (
                 <ResultTable result={result} onNewScrape={handleNewScrape} />
-              )}
+              ) : null}
 
               {!isLoading && !error && !result && (
                 <div className="backdrop-blur-md bg-slate-800/40 border border-slate-700/50 rounded-2xl p-12 text-center shadow-2xl">

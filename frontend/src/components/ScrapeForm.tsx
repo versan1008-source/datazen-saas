@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Brain, Globe, AlertCircle, Info, Zap } from 'lucide-react';
+import { Search, Brain, Globe, AlertCircle, Info, Zap, Phone } from 'lucide-react';
 import { apiService, ScrapeRequest, EnhancedScrapeRequest } from '@/lib/api';
 
 interface ScrapeFormProps {
@@ -15,10 +15,11 @@ interface ScrapeFormProps {
 
 const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMode = false, onEnhancedModeChange }) => {
   const [url, setUrl] = useState('');
-  const [dataType, setDataType] = useState<'text' | 'images' | 'links' | 'emails' | 'linkedin_profile' | 'linkedin_company' | 'linkedin_jobs' | 'social_posts' | 'ecommerce_products'>('text');
+  const [dataType, setDataType] = useState<'text' | 'images' | 'links' | 'emails' | 'phone_numbers' | 'linkedin_profile' | 'linkedin_company' | 'linkedin_jobs' | 'social_posts' | 'ecommerce_products'>('text');
   const [aiMode, setAiMode] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [checkRobots, setCheckRobots] = useState(true);
+  const [resolveOwner, setResolveOwner] = useState(false);
   const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const [urlError, setUrlError] = useState('');
 
@@ -70,16 +71,17 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
     }
 
     // Map enhanced data types to basic types for API
-    const basicDataType = (['text', 'images', 'links', 'emails'].includes(dataType)
+    const basicDataType = (['text', 'images', 'links', 'emails', 'phone_numbers'].includes(dataType)
       ? dataType
-      : 'text') as 'text' | 'images' | 'links' | 'emails';
+      : 'text') as 'text' | 'images' | 'links' | 'emails' | 'phone_numbers';
 
     const request: ScrapeRequest = {
       url: url.trim(),
       data_type: basicDataType,
       ai_mode: aiMode && aiAvailable === true,
       custom_prompt: customPrompt.trim() || undefined,
-      check_robots: checkRobots
+      check_robots: checkRobots,
+      resolve_owner: resolveOwner && dataType === 'phone_numbers'
     };
 
     onSubmit(request);
@@ -89,7 +91,8 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
     { value: 'text', label: 'Text Content', icon: '📝', description: 'Extract visible text, headings, and paragraphs' },
     { value: 'images', label: 'Images', icon: '🖼️', description: 'Extract image URLs and metadata' },
     { value: 'links', label: 'Links', icon: '🔗', description: 'Extract all links and their information' },
-    { value: 'emails', label: 'Email Addresses', icon: '📧', description: 'Find email addresses and contact info' }
+    { value: 'emails', label: 'Email Addresses', icon: '📧', description: 'Find email addresses and contact info' },
+    { value: 'phone_numbers', label: 'Phone Numbers', icon: '☎️', description: 'Extract phone numbers from the website' }
   ];
 
   const enhancedDataTypeOptions = [
@@ -101,7 +104,8 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
     { value: 'ecommerce_products', label: 'E-commerce Products', icon: '🛒', description: 'Extract product info, prices, and reviews' },
     { value: 'images', label: 'Images', icon: '🖼️', description: 'Extract image URLs and metadata' },
     { value: 'links', label: 'Links', icon: '🔗', description: 'Extract all links and their information' },
-    { value: 'emails', label: 'Email Addresses', icon: '📧', description: 'Find email addresses and contact info' }
+    { value: 'emails', label: 'Email Addresses', icon: '📧', description: 'Find email addresses and contact info' },
+    { value: 'phone_numbers', label: 'Phone Numbers', icon: '☎️', description: 'Extract phone numbers from the website' }
   ];
 
   const dataTypeOptions = enhancedMode ? enhancedDataTypeOptions : basicDataTypeOptions;
@@ -220,6 +224,31 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
             ))}
           </div>
         </div>
+
+        {/* Resolve Owner Toggle - Only show for Phone Numbers */}
+        {dataType === 'phone_numbers' && (
+          <div className="border border-slate-700/50 rounded-xl p-4 backdrop-blur-sm bg-slate-800/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Phone className="w-5 h-5 text-cyan-400 mr-2" />
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-100">Resolve Owner</h3>
+                  <p className="text-xs text-slate-400">Attempt to identify who the number belongs to (person or business)</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={resolveOwner}
+                  onChange={(e) => setResolveOwner(e.target.checked)}
+                  disabled={isLoading}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-500/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* AI Mode Toggle */}
         <div className="border border-slate-700/50 rounded-xl p-4 backdrop-blur-sm bg-slate-800/30">

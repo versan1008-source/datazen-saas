@@ -27,11 +27,12 @@ router = APIRouter()
 class ScrapeRequest(BaseModel):
     """Request model for scraping endpoint"""
     url: str
-    data_type: Literal["text", "images", "links", "emails"]
+    data_type: Literal["text", "images", "links", "emails", "phone_numbers"]
     ai_mode: bool = False
     custom_prompt: Optional[str] = ""
     check_robots: bool = True
-    
+    resolve_owner: bool = False
+
     @validator('url')
     def validate_url_format(cls, v):
         if not validate_url(v):
@@ -41,21 +42,22 @@ class ScrapeRequest(BaseModel):
 class EnhancedScrapeRequest(BaseModel):
     """Request model for enhanced scraping endpoint with LinkedIn and social media support"""
     url: str
-    data_type: Literal["text", "images", "links", "emails", "linkedin_profile", "linkedin_company", "linkedin_jobs", "social_posts", "ecommerce_products"]
+    data_type: Literal["text", "images", "links", "emails", "phone_numbers", "linkedin_profile", "linkedin_company", "linkedin_jobs", "social_posts", "ecommerce_products"]
     ai_mode: bool = False
     custom_prompt: Optional[str] = ""
     check_robots: bool = True
     extract_structured_data: bool = True
+    resolve_owner: bool = False
 
     @validator('url')
     def validate_url_format(cls, v):
         if not validate_url(v):
             raise ValueError('Invalid URL format')
         return v
-    
+
     @validator('data_type')
     def validate_data_type(cls, v):
-        allowed_types = {"text", "images", "links", "emails"}
+        allowed_types = {"text", "images", "links", "emails", "phone_numbers"}
         if v not in allowed_types:
             raise ValueError(f'Data type must be one of: {", ".join(allowed_types)}')
         return v
@@ -117,7 +119,8 @@ async def scrape_website(request: ScrapeRequest, background_tasks: BackgroundTas
                 result = await scraper.scrape(
                     url=request.url,
                     data_type=request.data_type,
-                    check_robots=request.check_robots
+                    check_robots=request.check_robots,
+                    resolve_owner=getattr(request, 'resolve_owner', False)
                 )
         except Exception as playwright_error:
             logger.warning(f"Playwright scraper failed: {playwright_error}")

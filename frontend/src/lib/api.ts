@@ -42,19 +42,21 @@ api.interceptors.response.use(
 // Types
 export interface ScrapeRequest {
   url: string;
-  data_type: 'text' | 'images' | 'links' | 'emails';
+  data_type: 'text' | 'images' | 'links' | 'emails' | 'phone_numbers';
   ai_mode: boolean;
   custom_prompt?: string;
   check_robots?: boolean;
+  resolve_owner?: boolean;
 }
 
 export interface EnhancedScrapeRequest {
   url: string;
-  data_type: 'text' | 'images' | 'links' | 'emails' | 'linkedin_profile' | 'linkedin_company' | 'linkedin_jobs' | 'social_posts' | 'ecommerce_products';
+  data_type: 'text' | 'images' | 'links' | 'emails' | 'phone_numbers' | 'linkedin_profile' | 'linkedin_company' | 'linkedin_jobs' | 'social_posts' | 'ecommerce_products';
   ai_mode: boolean;
   custom_prompt?: string;
   check_robots?: boolean;
   extract_structured_data?: boolean;
+  resolve_owner?: boolean;
 }
 
 export interface ScrapeResponse {

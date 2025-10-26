@@ -117,23 +117,23 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
   const getDataTypeBadge = (item: any) => {
     const type = item.type || item.category || 'general';
     const badges: { [key: string]: { color: string; icon: string; label: string } } = {
-      'profile_name': { color: 'bg-blue-100 text-blue-800', icon: '👤', label: 'Profile' },
-      'profile_headline': { color: 'bg-blue-100 text-blue-800', icon: '💼', label: 'Headline' },
-      'experience': { color: 'bg-green-100 text-green-800', icon: '🏢', label: 'Experience' },
-      'company_name': { color: 'bg-purple-100 text-purple-800', icon: '🏢', label: 'Company' },
-      'company_description': { color: 'bg-purple-100 text-purple-800', icon: '📄', label: 'Description' },
-      'job_posting': { color: 'bg-orange-100 text-orange-800', icon: '💼', label: 'Job' },
-      'social_post': { color: 'bg-pink-100 text-pink-800', icon: '📱', label: 'Post' },
-      'product_title': { color: 'bg-yellow-100 text-yellow-800', icon: '🛒', label: 'Product' },
-      'product_price': { color: 'bg-green-100 text-green-800', icon: '💰', label: 'Price' },
-      'heading': { color: 'bg-indigo-100 text-indigo-800', icon: '📝', label: 'Heading' },
-      'paragraph': { color: 'bg-gray-100 text-gray-800', icon: '📄', label: 'Text' },
-      'list_item': { color: 'bg-cyan-100 text-cyan-800', icon: '📋', label: 'List' },
-      'structured_data': { color: 'bg-red-100 text-red-800', icon: '🔧', label: 'Structured' },
-      'meta_tag': { color: 'bg-teal-100 text-teal-800', icon: '🏷️', label: 'Meta' }
+      'profile_name': { color: 'bg-blue-500/20 text-blue-300 border border-blue-500/30', icon: '👤', label: 'Profile' },
+      'profile_headline': { color: 'bg-blue-500/20 text-blue-300 border border-blue-500/30', icon: '💼', label: 'Headline' },
+      'experience': { color: 'bg-green-500/20 text-green-300 border border-green-500/30', icon: '🏢', label: 'Experience' },
+      'company_name': { color: 'bg-purple-500/20 text-purple-300 border border-purple-500/30', icon: '🏢', label: 'Company' },
+      'company_description': { color: 'bg-purple-500/20 text-purple-300 border border-purple-500/30', icon: '📄', label: 'Description' },
+      'job_posting': { color: 'bg-orange-500/20 text-orange-300 border border-orange-500/30', icon: '💼', label: 'Job' },
+      'social_post': { color: 'bg-pink-500/20 text-pink-300 border border-pink-500/30', icon: '📱', label: 'Post' },
+      'product_title': { color: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30', icon: '🛒', label: 'Product' },
+      'product_price': { color: 'bg-green-500/20 text-green-300 border border-green-500/30', icon: '💰', label: 'Price' },
+      'heading': { color: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30', icon: '📝', label: 'Heading' },
+      'paragraph': { color: 'bg-slate-500/20 text-slate-300 border border-slate-500/30', icon: '📄', label: 'Text' },
+      'list_item': { color: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30', icon: '📋', label: 'List' },
+      'structured_data': { color: 'bg-red-500/20 text-red-300 border border-red-500/30', icon: '🔧', label: 'Structured' },
+      'meta_tag': { color: 'bg-teal-500/20 text-teal-300 border border-teal-500/30', icon: '🏷️', label: 'Meta' }
     };
 
-    const badge = badges[type] || { color: 'bg-gray-100 text-gray-800', icon: '📄', label: 'Content' };
+    const badge = badges[type] || { color: 'bg-slate-500/20 text-slate-300 border border-slate-500/30', icon: '📄', label: 'Content' };
 
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${badge.color}`}>
@@ -148,7 +148,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
     const value = item[column];
 
     if (value === null || value === undefined) {
-      return <span className="text-gray-400">—</span>;
+      return <span className="text-slate-600">—</span>;
     }
 
     // Handle URLs
@@ -158,7 +158,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
           href={value}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 underline flex items-center max-w-xs truncate"
+          className="text-cyan-400 hover:text-cyan-300 underline flex items-center max-w-xs truncate transition-colors"
           title={value}
         >
           {value}
@@ -172,7 +172,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
       return (
         <a
           href={`mailto:${value}`}
-          className="text-blue-600 hover:text-blue-800 underline"
+          className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
         >
           {value}
         </a>
@@ -188,8 +188,8 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
     if (column === 'raw_data' && typeof value === 'object') {
       return (
         <details className="cursor-pointer">
-          <summary className="text-blue-600 hover:text-blue-800">View JSON</summary>
-          <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
+          <summary className="text-cyan-400 hover:text-cyan-300 transition-colors">View JSON</summary>
+          <pre className="mt-2 text-xs bg-slate-900/50 p-2 rounded overflow-auto max-h-32 text-slate-300 border border-slate-700/50">
             {JSON.stringify(value, null, 2)}
           </pre>
         </details>
@@ -212,15 +212,15 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
 
   if (!result.success) {
     return (
-      <div className="bg-white rounded-xl shadow-lg border border-red-200 p-6">
+      <div className="backdrop-blur-md bg-slate-800/40 rounded-2xl shadow-2xl border border-red-500/30 p-6">
         <div className="flex items-center mb-4">
-          <AlertTriangle className="w-6 h-6 text-red-600 mr-2" />
-          <h3 className="text-lg font-semibold text-red-900">Scraping Failed</h3>
+          <AlertTriangle className="w-6 h-6 text-red-400 mr-2" />
+          <h3 className="text-lg font-semibold text-red-300">Extraction Failed</h3>
         </div>
-        <p className="text-red-700 mb-4">{result.error}</p>
+        <p className="text-red-200 mb-4">{result.error}</p>
         <button
           onClick={onNewScrape}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg transition-all"
         >
           Try Again
         </button>
@@ -229,23 +229,23 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+    <div className="backdrop-blur-md bg-slate-800/40 rounded-2xl shadow-2xl border border-slate-700/50">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-slate-700/50">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
-            <h3 className="text-xl font-semibold text-gray-900">
-              Scraping Results
+            <CheckCircle className="w-6 h-6 text-green-400 mr-2" />
+            <h3 className="text-xl font-semibold text-slate-100">
+              Extraction Results
             </h3>
             {result.ai_processed && (
-              <span className="ml-3 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm flex items-center">
+              <span className="ml-3 px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm flex items-center border border-purple-500/30">
                 <Brain className="w-3 h-3 mr-1" />
-                AI Processed
+                Smart Analysis
               </span>
             )}
             {result.website_type && result.website_type !== 'general' && (
-              <span className="ml-3 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center">
+              <span className="ml-3 px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm flex items-center border border-cyan-500/30">
                 <Zap className="w-3 h-3 mr-1" />
                 {result.website_type.replace('_', ' ').toUpperCase()}
               </span>
@@ -253,29 +253,29 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
           </div>
           <button
             onClick={onNewScrape}
-            className="px-4 py-2 text-blue-600 hover:text-blue-800 font-medium"
+            className="px-4 py-2 text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
           >
-            New Scrape
+            New Extraction
           </button>
         </div>
 
         {/* Metadata */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center text-gray-600">
-            <Database className="w-4 h-4 mr-2" />
+          <div className="flex items-center text-slate-400">
+            <Database className="w-4 h-4 mr-2 text-cyan-400" />
             <span>{result.count} {result.data_type} items found</span>
           </div>
-          <div className="flex items-center text-gray-600">
-            <Clock className="w-4 h-4 mr-2" />
+          <div className="flex items-center text-slate-400">
+            <Clock className="w-4 h-4 mr-2 text-cyan-400" />
             <span>{result.processing_time_seconds}s processing time</span>
           </div>
-          <div className="flex items-center text-gray-600">
-            <ExternalLink className="w-4 h-4 mr-2" />
+          <div className="flex items-center text-slate-400">
+            <ExternalLink className="w-4 h-4 mr-2 text-cyan-400" />
             <a
               href={result.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline truncate max-w-xs"
+              className="text-cyan-400 hover:text-cyan-300 underline truncate max-w-xs transition-colors"
             >
               {result.url}
             </a>
@@ -284,11 +284,11 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
       </div>
 
       {/* Controls */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      <div className="p-6 border-b border-slate-700/50 bg-slate-800/20">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           {/* Search */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
             <input
               type="text"
               placeholder="Search results..."
@@ -297,7 +297,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-slate-700/50 rounded-lg bg-slate-800/50 text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
             />
           </div>
 
@@ -305,14 +305,14 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownloadCSV}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white rounded-lg transition-all shadow-lg shadow-green-500/30"
             >
               <FileText className="w-4 h-4 mr-2" />
               CSV
             </button>
             <button
               onClick={handleDownloadJSON}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg transition-all shadow-lg shadow-cyan-500/30"
             >
               <Download className="w-4 h-4 mr-2" />
               JSON
@@ -322,7 +322,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
 
         {/* Items per page */}
         <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-slate-400">
             <span>Show:</span>
             <select
               value={itemsPerPage}
@@ -330,7 +330,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded px-2 py-1"
+              className="border border-slate-700/50 rounded px-2 py-1 bg-slate-800/50 text-slate-100"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -341,7 +341,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
           </div>
 
           {selectedItems.size > 0 && (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-cyan-400">
               {selectedItems.size} item(s) selected
             </div>
           )}
@@ -352,42 +352,42 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
       {filteredData.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-slate-800/50">
               <tr>
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedItems.size === paginatedData.length && paginatedData.length > 0}
                     onChange={selectAll}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-slate-600 text-cyan-500 focus:ring-cyan-500 bg-slate-800"
                   />
                 </th>
                 {columns.map((column) => (
                   <th
                     key={column}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider"
                   >
                     {column.replace(/_/g, ' ')}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-700/50">
               {paginatedData.map((item, index) => (
                 <tr
                   key={index}
-                  className={`hover:bg-gray-50 ${selectedItems.has(index) ? 'bg-blue-50' : ''}`}
+                  className={`transition-colors ${selectedItems.has(index) ? 'bg-cyan-500/10' : 'hover:bg-slate-800/30'}`}
                 >
                   <td className="px-6 py-4">
                     <input
                       type="checkbox"
                       checked={selectedItems.has(index)}
                       onChange={() => toggleItemSelection(index)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-slate-600 text-cyan-500 focus:ring-cyan-500 bg-slate-800"
                     />
                   </td>
                   {columns.map((column) => (
-                    <td key={column} className="px-6 py-4 text-sm text-gray-900">
+                    <td key={column} className="px-6 py-4 text-sm text-slate-300">
                       {renderCellContent(item, column)}
                     </td>
                   ))}
@@ -398,22 +398,22 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
         </div>
       ) : (
         <div className="p-12 text-center">
-          <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">No results found matching your search.</p>
+          <Search className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-400">No results found matching your search.</p>
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+        <div className="px-6 py-4 border-t border-slate-700/50 flex items-center justify-between">
+          <div className="text-sm text-slate-400">
             Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} results
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-slate-700/50 rounded text-sm text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800/50 transition-colors"
             >
               Previous
             </button>
@@ -425,9 +425,9 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-1 border rounded text-sm ${currentPage === pageNum
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'border-gray-300 hover:bg-gray-50'
+                  className={`px-3 py-1 border rounded text-sm transition-all ${currentPage === pageNum
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-cyan-500'
+                    : 'border-slate-700/50 text-slate-300 hover:bg-slate-800/50'
                     }`}
                 >
                   {pageNum}
@@ -438,7 +438,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
             <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-slate-700/50 rounded text-sm text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800/50 transition-colors"
             >
               Next
             </button>

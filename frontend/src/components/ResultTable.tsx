@@ -15,9 +15,12 @@ import {
   Brain,
   CheckCircle,
   AlertTriangle,
-  Zap
+  Zap,
+  Lock
 } from 'lucide-react';
 import { ScrapeResponse, downloadUtils } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
+import Link from 'next/link';
 
 interface ResultTableProps {
   result: ScrapeResponse;
@@ -25,10 +28,15 @@ interface ResultTableProps {
 }
 
 const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Check if user's plan supports CSV export
+  const canExportCSV = user && (user.plan === 'pro' || user.plan === 'business');
 
   // Filter data based on search term
   const filteredData = useMemo(() => {
@@ -105,6 +113,12 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
   };
 
   const handleDownloadCSV = () => {
+    // Check if user's plan supports CSV export
+    if (!canExportCSV) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     const dataToDownload = selectedItems.size > 0
       ? paginatedData.filter((_, index) => selectedItems.has(index))
       : result.data;
@@ -305,9 +319,19 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleDownloadCSV}
-              className="flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white rounded-lg transition-all shadow-lg shadow-green-500/30"
+              disabled={!canExportCSV}
+              title={!canExportCSV ? 'CSV export available in Pro and Business plans' : 'Download as CSV'}
+              className={`flex items-center px-4 py-2 rounded-lg transition-all shadow-lg ${
+                canExportCSV
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white shadow-green-500/30 cursor-pointer'
+                  : 'bg-slate-700/50 text-slate-400 cursor-not-allowed opacity-60'
+              }`}
             >
-              <FileText className="w-4 h-4 mr-2" />
+              {!canExportCSV ? (
+                <Lock className="w-4 h-4 mr-2" />
+              ) : (
+                <FileText className="w-4 h-4 mr-2" />
+              )}
               CSV
             </button>
             <button
@@ -442,6 +466,39 @@ const ResultTable: React.FC<ResultTableProps> = ({ result, onNewScrape }) => {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* CSV Export Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 mx-auto mb-4">
+              <FileText className="w-6 h-6 text-green-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100 text-center mb-2">CSV Export</h3>
+            <p className="text-slate-400 text-center mb-6">
+              CSV export is available in <span className="font-semibold text-cyan-400">Pro</span> and <span className="font-semibold text-purple-400">Business</span> plans.
+            </p>
+            <div className="space-y-3 mb-6">
+              <p className="text-sm text-slate-400">Your current plan: <span className="font-semibold text-cyan-400 capitalize">{user?.plan || 'Free'}</span></p>
+              <p className="text-sm text-slate-400">JSON export is available in all plans.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 px-4 py-2 border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-700/50 transition-colors"
+              >
+                Cancel
+              </button>
+              <Link
+                href="/billing"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg transition-all text-center font-medium"
+              >
+                Upgrade Plan
+              </Link>
+            </div>
           </div>
         </div>
       )}

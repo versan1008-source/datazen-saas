@@ -405,23 +405,90 @@ class FallbackScraper:
                 'timestamp': datetime.now().isoformat()
             }
     
+    def extract_phone_numbers(self, url: str) -> Dict[str, Any]:
+        """Extract phone numbers from webpage"""
+        try:
+            html_content, final_url = self.fetch_page_content(url)
+            soup = BeautifulSoup(html_content, 'html.parser')
+
+            phone_numbers = []
+
+            # Phone number regex patterns
+            patterns = [
+                r'\+?1?\s*\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})',  # US format
+                r'\+?[1-9]\d{1,14}',  # International E.164 format
+                r'\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})',  # US without country code
+            ]
+
+            seen_numbers = set()
+            text_content = soup.get_text()
+
+            for pattern in patterns:
+                matches = re.finditer(pattern, text_content)
+                for match in matches:
+                    phone = match.group(0).strip()
+                    # Normalize phone number
+                    normalized = re.sub(r'[^\d+]', '', phone)
+
+                    if normalized not in seen_numbers and len(normalized) >= 10:
+                        seen_numbers.add(normalized)
+
+                        # Get context around the phone number
+                        start = max(0, match.start() - 50)
+                        end = min(len(text_content), match.end() + 50)
+                        context = text_content[start:end].strip()
+
+                        # Extract context snippet (3-6 words)
+                        words = context.split()
+                        snippet = ' '.join(words[:6])
+
+                        phone_numbers.append({
+                            'phone': phone,
+                            'normalized': normalized,
+                            'owner': 'Unknown',
+                            'owner_type': 'Unknown',
+                            'confidence': 50,
+                            'source': 'unknown',
+                            'context_snippet': snippet,
+                            'data_source': 'extracted_from_page'
+                        })
+
+            logger.info(f"Successfully scraped {len(phone_numbers)} phone numbers from {url}")
+            result = format_scrape_result(phone_numbers, 'phone_numbers')
+            result['url'] = url
+            result['timestamp'] = datetime.now().isoformat()
+            return result
+
+        except Exception as e:
+            logger.error(f"Error extracting phone numbers from {url}: {e}")
+            # Return a proper error result instead of raising
+            return {
+                'success': False,
+                'data_type': 'phone_numbers',
+                'count': 0,
+                'data': [],
+                'error': str(e),
+                'url': url,
+                'timestamp': datetime.now().isoformat()
+            }
+
     def scrape(self, url: str, data_type: str) -> Dict[str, Any]:
         """Main scraping method"""
         # Validate URL
         if not validate_url(url):
             raise ValueError(f"Invalid URL: {url}")
-        
+
         # Normalize URL (just ensure it has a scheme)
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
-        
+
         # Check robots.txt (optional, can be disabled)
         try:
             if not check_robots_txt(url):
                 logger.warning(f"Robots.txt disallows scraping {url}")
         except Exception as e:
             logger.warning(f"Could not check robots.txt for {url}: {e}")
-        
+
         # Route to appropriate extraction method
         if data_type == 'text':
             return self.extract_text(url)
@@ -431,5 +498,7 @@ class FallbackScraper:
             return self.extract_links(url)
         elif data_type == 'emails':
             return self.extract_emails(url)
+        elif data_type == 'phone_numbers':
+            return self.extract_phone_numbers(url)
         else:
             raise ValueError(f"Unsupported data type: {data_type}")

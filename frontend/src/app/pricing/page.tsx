@@ -1,13 +1,33 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, X, Zap, Crown, Rocket } from 'lucide-react';
+import { Check, X, Zap, Crown, Rocket, Gift } from 'lucide-react';
 import Link from 'next/link';
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const plans = [
+    {
+      name: 'Free',
+      price: 0,
+      description: 'Perfect for trying out DataZen',
+      icon: Gift,
+      features: [
+        { name: '500 pages/month', included: true },
+        { name: '1 concurrent job', included: true },
+        { name: 'Basic data extraction', included: true },
+        { name: 'JSON export', included: true },
+        { name: 'Email support', included: true },
+        { name: 'CSV export', included: false },
+        { name: 'Scheduling', included: false },
+        { name: 'Webhooks', included: false },
+        { name: 'API access', included: false },
+        { name: 'Dedicated proxy', included: false },
+      ],
+      cta: 'Get Started',
+      highlighted: false,
+    },
     {
       name: 'Starter',
       price: billingCycle === 'monthly' ? 4.99 : 49.90,
@@ -110,7 +130,7 @@ const PricingPage = () => {
 
       {/* Pricing Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-4 gap-8">
           {plans.map((plan, index) => {
             const Icon = plan.icon;
             return (

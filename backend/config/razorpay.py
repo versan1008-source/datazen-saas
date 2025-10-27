@@ -26,6 +26,7 @@ GRACE_PERIOD_DAYS = 3
 
 # Razorpay plan IDs (to be created in Razorpay dashboard)
 RAZORPAY_PLANS = {
+    "free": os.getenv("RAZORPAY_PLAN_FREE", ""),
     "starter": os.getenv("RAZORPAY_PLAN_STARTER", ""),
     "pro": os.getenv("RAZORPAY_PLAN_PRO", ""),
     "business": os.getenv("RAZORPAY_PLAN_BUSINESS", "")
@@ -33,6 +34,26 @@ RAZORPAY_PLANS = {
 
 # Pricing in USD (in cents for Razorpay)
 PRICING = {
+    "free": {
+        "name": "Free",
+        "price_usd": 0.00,
+        "price_cents": 0,  # Free
+        "monthly_quota": 500,
+        "max_concurrent_jobs": 1,
+        "max_team_seats": 1,
+        "features": {
+            "scheduling": False,
+            "webhooks": False,
+            "csv_export": False,
+            "json_export": True,
+            "dedicated_proxy": False,
+            "captcha_solver": False,
+            "priority_queue": False,
+            "api_access": False,
+            "basic_extraction": True,
+            "email_support": True
+        }
+    },
     "starter": {
         "name": "Starter",
         "price_usd": 4.99,
@@ -44,11 +65,13 @@ PRICING = {
             "scheduling": False,
             "webhooks": False,
             "csv_export": False,
-            "json_export": False,
+            "json_export": True,
             "dedicated_proxy": False,
             "captcha_solver": False,
             "priority_queue": False,
-            "api_access": False
+            "api_access": False,
+            "basic_extraction": True,
+            "email_support": True
         }
     },
     "pro": {
@@ -66,7 +89,9 @@ PRICING = {
             "dedicated_proxy": False,
             "captcha_solver": False,
             "priority_queue": False,
-            "api_access": True
+            "api_access": True,
+            "advanced_extraction": True,
+            "priority_email_support": True
         }
     },
     "business": {
@@ -84,7 +109,9 @@ PRICING = {
             "dedicated_proxy": True,
             "captcha_solver": True,
             "priority_queue": True,
-            "api_access": True
+            "api_access": True,
+            "enterprise_extraction": True,
+            "phone_support_24_7": True
         }
     }
 }

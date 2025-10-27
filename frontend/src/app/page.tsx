@@ -232,6 +232,55 @@ function HomeContent() {
           </div>
         </section>
 
+        {/* Usage Counter Card */}
+        {user && (
+          <section className="px-4 sm:px-6 lg:px-8 mb-8">
+            <div className="max-w-5xl mx-auto">
+              <div className="backdrop-blur-md bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-6 shadow-lg">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div>
+                    <p className="text-sm text-slate-400 mb-2">Your Usage This Month</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold text-cyan-400">{user.requestsUsed}</span>
+                      <span className="text-xl text-slate-400">/ {user.requestsLimit}</span>
+                      <span className="text-sm text-slate-500 ml-2">pages</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 md:flex-none w-full md:w-64">
+                    <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-300 ${
+                          user.requestsUsed >= user.requestsLimit
+                            ? 'bg-red-500'
+                            : user.requestsUsed >= user.requestsLimit * 0.8
+                            ? 'bg-yellow-500'
+                            : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                        }`}
+                        style={{ width: `${Math.min((user.requestsUsed / user.requestsLimit) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">
+                      {user.requestsLimit - user.requestsUsed} pages remaining
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-sm text-slate-400 mb-2">Current Plan</p>
+                    <p className="text-lg font-semibold text-cyan-400 capitalize">{user.plan}</p>
+                    <Link
+                      href="/billing"
+                      className="text-xs text-blue-400 hover:text-blue-300 mt-2 inline-block transition-colors"
+                    >
+                      Upgrade Plan →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Main Content - Centered Form First */}
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           {/* Form Section - Centered */}

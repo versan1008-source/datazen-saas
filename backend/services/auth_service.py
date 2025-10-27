@@ -71,25 +71,53 @@ class AuthService:
         full_name: str = ""
     ) -> Tuple[Optional[User], Optional[str]]:
         """Register a new user"""
-        
+
         # Check if user already exists
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user:
             return None, "Email already registered"
-        
-        # Create new user
+
+        # Get or create Free plan
+        free_plan = db.query(Plan).filter(Plan.name == "Free").first()
+        if not free_plan:
+            free_plan = Plan(
+                name="Free",
+                description="Free Plan",
+                price_usd=0.00,
+                monthly_quota=500,
+                max_concurrent_jobs=1,
+                max_team_seats=1,
+                features={
+                    "scheduling": False,
+                    "webhooks": False,
+                    "csv_export": False,
+                    "json_export": True,
+                    "dedicated_proxy": False,
+                    "captcha_solver": False,
+                    "priority_queue": False,
+                    "api_access": False,
+                    "basic_extraction": True,
+                    "email_support": True
+                }
+            )
+            db.add(free_plan)
+            db.commit()
+            db.refresh(free_plan)
+
+        # Create new user with Free plan
         user = User(
             email=email,
             password_hash=AuthService.hash_password(password),
             full_name=full_name,
             api_key=AuthService.generate_api_key(),
+            plan_id=free_plan.id,
             quota_reset_date=datetime.utcnow()
         )
-        
+
         db.add(user)
         db.commit()
         db.refresh(user)
-        
+
         return user, None
     
     @staticmethod

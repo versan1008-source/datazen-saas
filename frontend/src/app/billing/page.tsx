@@ -8,56 +8,67 @@ import { useAuth } from '@/lib/auth-context';
 
 function BillingContent() {
   const { user } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'premium'>(user?.plan || 'free');
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'starter' | 'pro' | 'business'>(user?.plan || 'free');
 
   const plans = [
     {
       name: 'Free',
       price: '$0',
       period: '/month',
-      requests: '50 requests/month',
+      requests: '500 pages/month',
       features: [
-        'Standard speed scraping',
         'Basic data extraction',
-        'CSV & JSON export',
+        'JSON export',
         'Email support',
-        'Community access'
+        '1 concurrent job'
       ],
       id: 'free'
+    },
+    {
+      name: 'Starter',
+      price: '$4.99',
+      period: '/month',
+      requests: '2,000 pages/month',
+      features: [
+        'Basic data extraction',
+        'JSON export',
+        'Email support',
+        '1 concurrent job'
+      ],
+      id: 'starter'
     },
     {
       name: 'Pro',
       price: '$14.99',
       period: '/month',
-      requests: '1,000 requests/month',
+      requests: '25,000 pages/month',
       features: [
-        'Faster speed scraping',
-        'All data types supported',
+        'Advanced data extraction',
         'CSV & JSON export',
         'Priority email support',
-        'Advanced filtering',
-        'Custom prompts (AI)',
+        '10 concurrent jobs',
+        'Scheduling',
+        'Webhooks',
         'API access'
       ],
       id: 'pro'
     },
     {
-      name: 'Premium',
+      name: 'Business',
       price: '$39.99',
       period: '/month',
-      requests: '5,000 requests/month',
+      requests: '100,000 pages/month',
       features: [
-        'Highest speed scraping',
-        'All data types + enhanced',
-        'CSV & JSON export',
-        'Priority phone support',
-        'Advanced filtering',
-        'Custom prompts (AI)',
+        'Enterprise data extraction',
+        'All export formats',
+        '24/7 phone & email support',
+        'Unlimited concurrent jobs',
+        'Scheduling',
+        'Webhooks',
         'API access',
-        'Priority queue',
-        'Dedicated support'
+        'Dedicated proxy'
       ],
-      id: 'premium'
+      id: 'business'
     }
   ];
 
@@ -147,7 +158,7 @@ function BillingContent() {
             {/* Plans Comparison */}
             <div className="mb-12">
               <h3 className="text-2xl font-bold text-slate-100 mb-8">Available Plans</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {plans.map((plan) => (
                   <div
                     key={plan.id}

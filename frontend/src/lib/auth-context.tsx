@@ -43,7 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           });
           if (response.ok) {
-            const userData = await response.json();
+            const data = await response.json();
+            // Transform user data to match our User interface
+            const userData: User = {
+              id: data.id || 'unknown',
+              email: data.email || '',
+              fullName: data.full_name || 'User',
+              plan: (data.plan_id || 'free') as 'free' | 'pro' | 'premium',
+              requestsUsed: data.quota_used || 0,
+              requestsLimit: data.quota_limit || 10,
+              createdAt: data.created_at || new Date().toISOString()
+            };
             setUser(userData);
           } else {
             localStorage.removeItem('authToken');
@@ -99,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fullName: data.user?.full_name || 'User',
         plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
         requestsUsed: data.user?.quota_used || 0,
-        requestsLimit: data.user?.quota_limit || 50,
+        requestsLimit: data.user?.quota_limit || 10,
         createdAt: data.user?.created_at || new Date().toISOString()
       };
 
@@ -152,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fullName: data.user?.full_name || fullName,
         plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
         requestsUsed: data.user?.quota_used || 0,
-        requestsLimit: data.user?.quota_limit || 50,
+        requestsLimit: data.user?.quota_limit || 10,
         createdAt: data.user?.created_at || new Date().toISOString()
       };
 
@@ -205,7 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fullName: data.user?.full_name || 'Google User',
         plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
         requestsUsed: data.user?.quota_used || 0,
-        requestsLimit: data.user?.quota_limit || 50,
+        requestsLimit: data.user?.quota_limit || 10,
         createdAt: data.user?.created_at || new Date().toISOString()
       };
 

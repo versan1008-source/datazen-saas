@@ -2,19 +2,24 @@
 API routes for DataZen web scraping functionality
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, status
 from pydantic import BaseModel, HttpUrl, validator
 from typing import Optional, Dict, Any, Literal
 import asyncio
 import logging
 import os
 from datetime import datetime
+from sqlalchemy.orm import Session
 
 from services.scraper import WebScraper
 from services.fallback_scraper import FallbackScraper
 from services.enhanced_scraper import EnhancedScraper
 from services.gemini_api import GeminiAI
 from services.utils import validate_url
+from services.usage_service import UsageService
+from middleware.auth_middleware import get_current_user
+from config.database import get_db
+from models.user import User
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,18 +95,33 @@ async def get_gemini_ai():
         return None
 
 @router.post("/scrape", response_model=ScrapeResponse)
-async def scrape_website(request: ScrapeRequest, background_tasks: BackgroundTasks):
+async def scrape_website(
+    request: ScrapeRequest,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Main scraping endpoint
-    
+    Main scraping endpoint with authentication and quota checking
+
     Args:
         request (ScrapeRequest): Scraping request parameters
         background_tasks (BackgroundTasks): FastAPI background tasks
-        
+        current_user (User): Authenticated user
+        db (Session): Database session
+
     Returns:
         ScrapeResponse: Scraping results
     """
     start_time = datetime.now()
+
+    # Check if user has quota available
+    has_quota, error_message = UsageService.check_quota(db, current_user.id, pages_to_scrape=1)
+    if not has_quota:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=error_message or "Quota exceeded. Please upgrade your plan."
+        )
     
     try:
         logger.info(f"Starting scrape request: {request.url} ({request.data_type})")
@@ -197,6 +217,19 @@ async def scrape_website(request: ScrapeRequest, background_tasks: BackgroundTas
 
         # Log success
         logger.info(f"Scraping completed: {request.url} - {result.get('count', 0)} items in {processing_time:.2f}s")
+
+        # Log usage for authenticated user
+        UsageService.log_usage(
+            db=db,
+            user_id=current_user.id,
+            url=request.url,
+            data_type=request.data_type,
+            pages_scraped=1,
+            source="api",
+            success=result.get('success', False),
+            error_message=None,
+            processing_time_seconds=int(processing_time)
+        )
 
         # Return response
         return ScrapeResponse(**result)
@@ -316,17 +349,32 @@ async def health_check():
     }
 
 @router.post("/scrape-enhanced")
-async def scrape_enhanced(request: EnhancedScrapeRequest):
+async def scrape_enhanced(
+    request: EnhancedScrapeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
-    Enhanced scraping endpoint with LinkedIn and social media support
+    Enhanced scraping endpoint with LinkedIn and social media support and quota checking
 
     Args:
         request (EnhancedScrapeRequest): Scraping request with enhanced options
+        current_user (User): Authenticated user
+        db (Session): Database session
 
     Returns:
         Dict[str, Any]: Scraping results with enhanced data extraction
     """
     start_time = datetime.now()
+
+    # Check if user has quota available
+    has_quota, error_message = UsageService.check_quota(db, current_user.id, pages_to_scrape=1)
+    if not has_quota:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=error_message or "Quota exceeded. Please upgrade your plan."
+        )
+
     logger.info(f"Starting enhanced scrape request: {request.url} ({request.data_type})")
 
     try:
@@ -382,6 +430,20 @@ async def scrape_enhanced(request: EnhancedScrapeRequest):
         result['processing_time_seconds'] = processing_time
 
         logger.info(f"Enhanced scraping completed: {request.url} - {result.get('count', 0)} items in {processing_time:.2f}s")
+
+        # Log usage for authenticated user
+        UsageService.log_usage(
+            db=db,
+            user_id=current_user.id,
+            url=request.url,
+            data_type=request.data_type,
+            pages_scraped=1,
+            source="api",
+            success=result.get('success', False),
+            error_message=None,
+            processing_time_seconds=int(processing_time)
+        )
+
         return result
 
     except HTTPException:

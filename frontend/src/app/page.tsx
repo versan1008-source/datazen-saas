@@ -189,7 +189,21 @@ function HomeContent() {
                           className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
-                          Settings
+                          API Keys
+                        </Link>
+                        <Link
+                          href="/scheduling"
+                          className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Scheduling
+                        </Link>
+                        <Link
+                          href="/webhooks"
+                          className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Webhooks
                         </Link>
                         <Link
                           href="/billing"

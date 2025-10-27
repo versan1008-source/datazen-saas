@@ -159,12 +159,54 @@ async def regenerate_api_key(
         message="API key regenerated successfully"
     )
 
+@router.post("/google")
+async def google_login(
+    db: Session = Depends(get_db)
+):
+    """Google OAuth login endpoint"""
+
+    # For now, create a test user for Google login
+    # In production, this would validate the Google token
+    test_email = f"google_user_{datetime.utcnow().timestamp()}@google.com"
+    test_name = "Google User"
+
+    # Check if user exists, if not create one
+    user, error = AuthService.register_user(
+        db=db,
+        email=test_email,
+        password="google_oauth_user",
+        full_name=test_name
+    )
+
+    if error and "already exists" not in error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error
+        )
+
+    # If user already exists, get them
+    if error:
+        user, error = AuthService.login_user(
+            db=db,
+            email=test_email,
+            password="google_oauth_user"
+        )
+
+    # Create JWT token
+    token, expiration = AuthService.create_jwt_token(user.id, user.email)
+
+    return LoginResponse(
+        access_token=token,
+        user=user.to_dict(),
+        expires_at=expiration.isoformat()
+    )
+
 @router.post("/logout")
 async def logout(
     current_user: User = Depends(get_current_user)
 ):
     """Logout user (client-side token deletion)"""
-    
+
     return {
         "message": "Logged out successfully",
         "timestamp": datetime.utcnow().isoformat()

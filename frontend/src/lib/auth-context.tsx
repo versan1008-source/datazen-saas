@@ -18,6 +18,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (fullName: string, email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => void;
 }
 
@@ -66,25 +67,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Login failed');
+        let errorMessage = 'Login failed';
+        try {
+          const error = await response.json();
+          errorMessage = error.detail || error.message || 'Login failed';
+        } catch (e) {
+          errorMessage = `Login failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('Invalid response from server. Please try again.');
+      }
+
+      if (!data.access_token) {
+        throw new Error('No authentication token received');
+      }
+
       localStorage.setItem('authToken', data.access_token);
 
       // Transform user data to match our User interface
       const userData: User = {
-        id: data.user.id,
-        email: data.user.email,
-        fullName: data.user.full_name,
-        plan: (data.user.plan_id || 'free') as 'free' | 'pro' | 'premium',
-        requestsUsed: data.user.quota_used || 0,
-        requestsLimit: data.user.quota_limit || 50,
-        createdAt: data.user.created_at
+        id: data.user?.id || 'unknown',
+        email: data.user?.email || email,
+        fullName: data.user?.full_name || 'User',
+        plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
+        requestsUsed: data.user?.quota_used || 0,
+        requestsLimit: data.user?.quota_limit || 50,
+        createdAt: data.user?.created_at || new Date().toISOString()
       };
 
       setUser(userData);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -100,25 +120,97 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Signup failed');
+        let errorMessage = 'Signup failed';
+        try {
+          const error = await response.json();
+          errorMessage = error.detail || error.message || 'Signup failed';
+        } catch (e) {
+          errorMessage = `Signup failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('Invalid response from server. Please try again.');
+      }
+
+      if (!data.access_token) {
+        throw new Error('No authentication token received');
+      }
+
       localStorage.setItem('authToken', data.access_token);
 
       // Transform user data to match our User interface
       const userData: User = {
-        id: data.user.id,
-        email: data.user.email,
-        fullName: data.user.full_name,
-        plan: (data.user.plan_id || 'free') as 'free' | 'pro' | 'premium',
-        requestsUsed: data.user.quota_used || 0,
-        requestsLimit: data.user.quota_limit || 50,
-        createdAt: data.user.created_at
+        id: data.user?.id || 'unknown',
+        email: data.user?.email || email,
+        fullName: data.user?.full_name || fullName,
+        plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
+        requestsUsed: data.user?.quota_used || 0,
+        requestsLimit: data.user?.quota_limit || 50,
+        createdAt: data.user?.created_at || new Date().toISOString()
       };
 
       setUser(userData);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    setIsLoading(true);
+    try {
+      // For now, we'll use a mock Google login
+      // In production, integrate with Google OAuth 2.0
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Google login failed';
+        try {
+          const error = await response.json();
+          errorMessage = error.detail || error.message || 'Google login failed';
+        } catch (e) {
+          errorMessage = `Google login failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('Invalid response from server. Please try again.');
+      }
+
+      if (!data.access_token) {
+        throw new Error('No authentication token received');
+      }
+
+      localStorage.setItem('authToken', data.access_token);
+
+      const userData: User = {
+        id: data.user?.id || 'unknown',
+        email: data.user?.email || 'user@google.com',
+        fullName: data.user?.full_name || 'Google User',
+        plan: (data.user?.plan_id || 'free') as 'free' | 'pro' | 'premium',
+        requestsUsed: data.user?.quota_used || 0,
+        requestsLimit: data.user?.quota_limit || 50,
+        createdAt: data.user?.created_at || new Date().toISOString()
+      };
+
+      setUser(userData);
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         login,
         signup,
+        loginWithGoogle,
         logout
       }}
     >

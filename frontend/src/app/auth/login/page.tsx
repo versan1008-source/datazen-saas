@@ -8,13 +8,14 @@ import { useAuth } from '@/lib/auth-context';
 
 const LoginPage = () => {
   const router = useRouter();
-  const { login, isLoading: authLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
   });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +46,19 @@ const LoginPage = () => {
       setError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Google login failed');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -152,10 +166,19 @@ const LoginPage = () => {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-4">
-            <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-all">
-              Google
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading || loading}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-600 text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            >
+              {googleLoading ? 'Loading...' : 'Google'}
             </button>
-            <button className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-all">
+            <button
+              type="button"
+              disabled={loading || googleLoading}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-gray-600 text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+            >
               GitHub
             </button>
           </div>

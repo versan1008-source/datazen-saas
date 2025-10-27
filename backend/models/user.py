@@ -26,7 +26,7 @@ class User(Base):
     
     # Subscription info
     plan_id = Column(String(36), ForeignKey("plans.id"), nullable=True)
-    subscription_id = Column(String(36), ForeignKey("subscriptions.id"), nullable=True)
+    subscription_id = Column(String(36), nullable=True)  # Reference to active subscription
 
     # Usage tracking
     quota_used = Column(Integer, default=0)  # Pages scraped this month

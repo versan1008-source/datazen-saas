@@ -42,23 +42,17 @@ app = FastAPI(
 )
 
 # Configure CORS
-cors_origins = [
-    "https://versan.in",
-    "https://www.versan.in",
-    "https://datazen-saas-42hvu5tey-pranaos-projects.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://localhost:3001",
-    "http://localhost:5173",
-]
-
-# In development, allow all origins
-if os.getenv("ENVIRONMENT", "production") == "development":
-    cors_origins = ["*"]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=[
+        "https://versan.in",
+        "https://www.versan.in",
+        "https://datazen-saas-42hvu5tey-pranaos-projects.vercel.app",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://localhost:3001",
+        "http://localhost:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

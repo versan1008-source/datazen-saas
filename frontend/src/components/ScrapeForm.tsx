@@ -3,8 +3,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Brain, Globe, AlertCircle, Info, Zap, Phone } from 'lucide-react';
+import { Search, Brain, Globe, AlertCircle, Info, Zap, Phone, Zap as ZapIcon } from 'lucide-react';
+import Link from 'next/link';
 import { apiService, ScrapeRequest, EnhancedScrapeRequest } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 
 interface ScrapeFormProps {
   onSubmit: (request: ScrapeRequest | EnhancedScrapeRequest) => void;
@@ -14,6 +16,7 @@ interface ScrapeFormProps {
 }
 
 const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMode = false, onEnhancedModeChange }) => {
+  const { user } = useAuth();
   const [url, setUrl] = useState('');
   const [dataType, setDataType] = useState<'text' | 'images' | 'links' | 'emails' | 'phone_numbers' | 'linkedin_profile' | 'linkedin_company' | 'linkedin_jobs' | 'social_posts' | 'ecommerce_products'>('text');
   const [aiMode, setAiMode] = useState(false);
@@ -22,6 +25,11 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
   const [resolveOwner, setResolveOwner] = useState(false);
   const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   const [urlError, setUrlError] = useState('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Check if user has reached their limit
+  const hasReachedLimit = user && user.requestsUsed >= user.requestsLimit;
+  const requestsRemaining = user ? user.requestsLimit - user.requestsUsed : 0;
 
   // Check AI availability on component mount
   useEffect(() => {
@@ -59,6 +67,12 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if user has reached their limit
+    if (hasReachedLimit) {
+      setShowUpgradeModal(true);
+      return;
+    }
 
     if (!url.trim()) {
       setUrlError('URL is required');
@@ -112,6 +126,63 @@ const ScrapeForm: React.FC<ScrapeFormProps> = ({ onSubmit, isLoading, enhancedMo
 
   return (
     <div>
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-yellow-500/20 mx-auto mb-4">
+              <ZapIcon className="w-6 h-6 text-yellow-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100 text-center mb-2">Request Limit Reached</h3>
+            <p className="text-slate-400 text-center mb-6">
+              You've used all {user?.requestsLimit} requests for this month. Upgrade your plan to continue scraping.
+            </p>
+            <div className="bg-slate-700/50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-slate-300 mb-2">Current Plan: <span className="font-bold text-cyan-400 capitalize">{user?.plan}</span></p>
+              <p className="text-sm text-slate-400">Requests: {user?.requestsUsed}/{user?.requestsLimit}</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 px-4 py-2 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <Link
+                href="/billing"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-lg font-medium transition-all text-center"
+              >
+                Upgrade Plan
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Usage Display */}
+      {user && (
+        <div className="mb-6 p-4 bg-slate-700/30 rounded-xl border border-slate-600/50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-slate-300">Requests Used</span>
+            <span className="text-sm font-bold text-cyan-400">{user.requestsUsed}/{user.requestsLimit}</span>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full transition-all ${
+                hasReachedLimit ? 'bg-red-500' : requestsRemaining < 10 ? 'bg-yellow-500' : 'bg-cyan-500'
+              }`}
+              style={{ width: `${Math.min((user.requestsUsed / user.requestsLimit) * 100, 100)}%` }}
+            />
+          </div>
+          {hasReachedLimit && (
+            <p className="text-xs text-red-400 mt-2">Limit reached. Upgrade to continue.</p>
+          )}
+          {requestsRemaining < 10 && !hasReachedLimit && (
+            <p className="text-xs text-yellow-400 mt-2">{requestsRemaining} requests remaining</p>
+          )}
+        </div>
+      )}
+
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-100 mb-2 flex items-center">
           <Globe className="w-6 h-6 mr-2 text-cyan-400" />

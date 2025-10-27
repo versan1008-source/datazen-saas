@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'https://datazen-saas-production.up.railway.app'; // Backend API URL
+const API_URL = 'https://datazen-saas.onrender.com'; // Backend API URL
 const CURRENT_DOMAIN = 'https://versan.in';
 
 // DOM Elements

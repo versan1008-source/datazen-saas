@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Webhook, Plus, AlertCircle, Trash2, Copy, Check, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/lib/auth-context';
+import { apiService } from '@/lib/api';
 
 function WebhooksContent() {
   const { user } = useAuth();
@@ -12,6 +13,8 @@ function WebhooksContent() {
   const [showForm, setShowForm] = useState(false);
   const [showSecret, setShowSecret] = useState<{ [key: number]: boolean }>({});
   const [copied, setCopied] = useState<{ [key: number]: boolean }>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     url: '',
     events: ['scrape.completed']
@@ -20,30 +23,58 @@ function WebhooksContent() {
   // Check if user's plan supports webhooks
   const canUseWebhooks = user && (user.plan === 'pro' || user.plan === 'business');
 
-  const handleAddWebhook = () => {
+  // Load webhooks on mount
+  useEffect(() => {
+    if (canUseWebhooks) {
+      loadWebhooks();
+    }
+  }, [canUseWebhooks]);
+
+  const loadWebhooks = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getWebhooks();
+      setWebhooks(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddWebhook = async () => {
     if (!formData.url.trim()) {
       alert('Please enter a webhook URL');
       return;
     }
 
-    const newWebhook = {
-      id: Date.now(),
-      url: formData.url,
-      events: formData.events,
-      secret: 'whk_' + Math.random().toString(36).substr(2, 32),
-      createdAt: new Date().toISOString(),
-      active: true,
-      lastTriggered: null
-    };
-
-    setWebhooks([...webhooks, newWebhook]);
-    setFormData({ url: '', events: ['scrape.completed'] });
-    setShowForm(false);
+    try {
+      setLoading(true);
+      const newWebhook = await apiService.createWebhook(formData);
+      setWebhooks([...webhooks, newWebhook]);
+      setFormData({ url: '', events: ['scrape.completed'] });
+      setShowForm(false);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteWebhook = (id: number) => {
+  const handleDeleteWebhook = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this webhook?')) {
-      setWebhooks(webhooks.filter(w => w.id !== id));
+      try {
+        setLoading(true);
+        await apiService.deleteWebhook(id);
+        setWebhooks(webhooks.filter(w => w.id !== id));
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -101,6 +132,13 @@ function WebhooksContent() {
             <h1 className="text-4xl font-bold mb-2">Webhooks</h1>
             <p className="text-slate-400">Receive real-time notifications for scraping events</p>
           </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-8 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
 
           {!canUseWebhooks && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-8 flex items-start gap-4">

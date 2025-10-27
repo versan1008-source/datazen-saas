@@ -227,6 +227,78 @@ export const apiService = {
     } catch (error: any) {
       throw new Error(error.response?.data?.detail || error.message || 'Failed to regenerate API key');
     }
+  },
+
+  /**
+   * Create a scheduled job
+   */
+  async createScheduledJob(data: any): Promise<any> {
+    try {
+      const response = await api.post('/api/scheduling/jobs', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to create scheduled job');
+    }
+  },
+
+  /**
+   * Get all scheduled jobs
+   */
+  async getScheduledJobs(): Promise<any[]> {
+    try {
+      const response = await api.get('/api/scheduling/jobs');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to get scheduled jobs');
+    }
+  },
+
+  /**
+   * Delete a scheduled job
+   */
+  async deleteScheduledJob(jobId: number): Promise<any> {
+    try {
+      const response = await api.delete(`/api/scheduling/jobs/${jobId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to delete scheduled job');
+    }
+  },
+
+  /**
+   * Create a webhook
+   */
+  async createWebhook(data: any): Promise<any> {
+    try {
+      const response = await api.post('/api/webhooks', data);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to create webhook');
+    }
+  },
+
+  /**
+   * Get all webhooks
+   */
+  async getWebhooks(): Promise<any[]> {
+    try {
+      const response = await api.get('/api/webhooks');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to get webhooks');
+    }
+  },
+
+  /**
+   * Delete a webhook
+   */
+  async deleteWebhook(webhookId: number): Promise<any> {
+    try {
+      const response = await api.delete(`/api/webhooks/${webhookId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to delete webhook');
+    }
   }
 };
 

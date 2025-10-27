@@ -1,18 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Clock, Plus, AlertCircle, Trash2, Edit2, Check } from 'lucide-react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/lib/auth-context';
+import { apiService } from '@/lib/api';
 
 function SchedulingContent() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     url: '',
-    dataType: 'text',
+    data_type: 'text',
     frequency: 'daily',
     time: '09:00'
   });
@@ -21,28 +24,58 @@ function SchedulingContent() {
   const canSchedule = user && (user.plan === 'pro' || user.plan === 'business');
   const maxJobs = user?.plan === 'business' ? 'Unlimited' : (user?.plan === 'pro' ? '10' : '0');
 
-  const handleAddJob = () => {
+  // Load jobs on mount
+  useEffect(() => {
+    if (canSchedule) {
+      loadJobs();
+    }
+  }, [canSchedule]);
+
+  const loadJobs = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getScheduledJobs();
+      setJobs(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddJob = async () => {
     if (!formData.url.trim()) {
       alert('Please enter a URL');
       return;
     }
 
-    const newJob = {
-      id: Date.now(),
-      ...formData,
-      createdAt: new Date().toISOString(),
-      nextRun: new Date().toISOString(),
-      status: 'active'
-    };
-
-    setJobs([...jobs, newJob]);
-    setFormData({ url: '', dataType: 'text', frequency: 'daily', time: '09:00' });
-    setShowForm(false);
+    try {
+      setLoading(true);
+      const newJob = await apiService.createScheduledJob(formData);
+      setJobs([...jobs, newJob]);
+      setFormData({ url: '', data_type: 'text', frequency: 'daily', time: '09:00' });
+      setShowForm(false);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteJob = (id: number) => {
+  const handleDeleteJob = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this job?')) {
-      setJobs(jobs.filter(job => job.id !== id));
+      try {
+        setLoading(true);
+        await apiService.deleteScheduledJob(id);
+        setJobs(jobs.filter(job => job.id !== id));
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -86,6 +119,13 @@ function SchedulingContent() {
             <h1 className="text-4xl font-bold mb-2">Scheduled Jobs</h1>
             <p className="text-slate-400">Automate your web scraping with scheduled jobs</p>
           </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-8 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
 
           {!canSchedule && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-8 flex items-start gap-4">
@@ -149,8 +189,8 @@ function SchedulingContent() {
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-2">Data Type</label>
                         <select
-                          value={formData.dataType}
-                          onChange={(e) => setFormData({ ...formData, dataType: e.target.value })}
+                          value={formData.data_type}
+                          onChange={(e) => setFormData({ ...formData, data_type: e.target.value })}
                           className="w-full px-4 py-2 bg-slate-900/50 border border-slate-700/50 rounded-lg text-slate-100"
                         >
                           <option value="text">Text</option>
@@ -211,13 +251,13 @@ function SchedulingContent() {
                         <div className="flex-1">
                           <h4 className="font-semibold text-slate-100 mb-1">{job.url}</h4>
                           <div className="flex items-center gap-4 text-sm text-slate-400">
-                            <span className="capitalize">{job.dataType}</span>
+                            <span className="capitalize">{job.data_type}</span>
                             <span className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
                               {job.frequency} at {job.time}
                             </span>
                             <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs">
-                              {job.status}
+                              {job.active ? 'Active' : 'Inactive'}
                             </span>
                           </div>
                         </div>

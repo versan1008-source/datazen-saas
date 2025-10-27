@@ -39,6 +39,14 @@ def get_db():
 
 def init_db():
     """Initialize database tables"""
+    # Import all models to register them with SQLAlchemy
+    from models.user import User
+    from models.plan import Plan
+    from models.subscription import Subscription
+    from models.usage_log import UsageLog
+    from models.scheduled_job import ScheduledJob
+    from models.webhook import Webhook
+
     Base.metadata.create_all(bind=engine)
 
 def drop_db():

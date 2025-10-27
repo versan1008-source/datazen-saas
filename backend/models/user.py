@@ -43,6 +43,8 @@ class User(Base):
     plan = relationship("Plan", back_populates="users", foreign_keys=[plan_id])
     subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
     usage_logs = relationship("UsageLog", back_populates="user", cascade="all, delete-orphan")
+    scheduled_jobs = relationship("ScheduledJob", back_populates="user", cascade="all, delete-orphan")
+    webhooks = relationship("Webhook", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User {self.email}>"

@@ -29,6 +29,8 @@ from routes.auth import router as auth_router
 from routes.subscription import router as subscription_router
 from routes.billing import router as billing_router
 from routes.webhooks import router as webhooks_router
+from routes.scheduling import router as scheduling_router
+from routes.user_webhooks import router as user_webhooks_router
 
 # Create FastAPI app
 app = FastAPI(
@@ -60,6 +62,8 @@ app.include_router(auth_router, prefix="/api", tags=["authentication"])
 app.include_router(subscription_router, prefix="/api", tags=["subscriptions"])
 app.include_router(billing_router, prefix="/api", tags=["billing"])
 app.include_router(webhooks_router, prefix="/api", tags=["webhooks"])
+app.include_router(scheduling_router, prefix="/api", tags=["scheduling"])
+app.include_router(user_webhooks_router, prefix="/api", tags=["user-webhooks"])
 
 @app.get("/")
 async def root():

@@ -20,8 +20,34 @@ if sys.platform == "win32":
 load_dotenv()
 
 # Initialize database
-from config.database import init_db
+from config.database import init_db, engine
 init_db()
+
+# Run migrations
+from sqlalchemy import text, inspect
+def run_migrations():
+    """Run database migrations"""
+    inspector = inspect(engine)
+    users_columns = [col['name'] for col in inspector.get_columns('users')]
+
+    if 'subscription_id' not in users_columns:
+        print("Running migration: Adding subscription_id column...")
+        with engine.connect() as connection:
+            try:
+                if "sqlite" in str(engine.url):
+                    connection.execute(text(
+                        "ALTER TABLE users ADD COLUMN subscription_id VARCHAR(36) NULL"
+                    ))
+                elif "postgresql" in str(engine.url):
+                    connection.execute(text(
+                        "ALTER TABLE users ADD COLUMN subscription_id VARCHAR(36) NULL"
+                    ))
+                connection.commit()
+                print("✅ Migration completed!")
+            except Exception as e:
+                print(f"Migration skipped (column may already exist): {e}")
+
+run_migrations()
 
 # Import routes
 from routes.scrape import router as scrape_router

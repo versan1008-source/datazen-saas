@@ -185,6 +185,13 @@ function HomeContent() {
                           <p className="text-xs text-slate-400 mt-1">{user.requestsUsed}/{user.requestsLimit} requests</p>
                         </div>
                         <Link
+                          href="/settings"
+                          className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Settings
+                        </Link>
+                        <Link
                           href="/billing"
                           className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
                           onClick={() => setShowUserMenu(false)}

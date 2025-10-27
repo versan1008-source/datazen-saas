@@ -215,6 +215,18 @@ export const apiService = {
     } catch (error: any) {
       throw new Error(error.response?.data?.error || error.message || 'Failed to get API info');
     }
+  },
+
+  /**
+   * Regenerate API key
+   */
+  async regenerateApiKey(): Promise<{ api_key: string; message: string }> {
+    try {
+      const response = await api.post<{ api_key: string; message: string }>('/api/auth/regenerate-api-key', {});
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.detail || error.message || 'Failed to regenerate API key');
+    }
   }
 };
 

@@ -51,12 +51,18 @@ class User(Base):
     
     def to_dict(self):
         """Convert to dictionary"""
+        # Get quota limit from plan
+        quota_limit = 10  # Default to Free plan (10 pages)
+        if self.plan:
+            quota_limit = self.plan.monthly_quota
+
         return {
             "id": self.id,
             "email": self.email,
             "full_name": self.full_name,
             "plan_id": self.plan_id,
             "quota_used": self.quota_used,
+            "quota_limit": quota_limit,
             "quota_reset_date": self.quota_reset_date.isoformat() if self.quota_reset_date else None,
             "is_active": self.is_active,
             "is_verified": self.is_verified,

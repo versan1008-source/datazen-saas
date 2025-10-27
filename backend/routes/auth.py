@@ -48,6 +48,7 @@ class UserResponse(BaseModel):
     plan_id: str
     subscription_id: str
     quota_used: int
+    quota_limit: int
     is_active: bool
     is_verified: bool
     created_at: str
@@ -125,7 +126,12 @@ async def get_current_user_info(
     current_user: User = Depends(get_current_user)
 ):
     """Get current user information"""
-    
+
+    # Get quota limit from plan
+    quota_limit = 10  # Default to Free plan (10 pages)
+    if current_user.plan:
+        quota_limit = current_user.plan.monthly_quota
+
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -134,6 +140,7 @@ async def get_current_user_info(
         plan_id=current_user.plan_id,
         subscription_id=current_user.subscription_id,
         quota_used=current_user.quota_used,
+        quota_limit=quota_limit,
         is_active=current_user.is_active,
         is_verified=current_user.is_verified,
         created_at=current_user.created_at.isoformat()

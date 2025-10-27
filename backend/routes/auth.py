@@ -46,7 +46,7 @@ class UserResponse(BaseModel):
     full_name: str
     api_key: str
     plan_id: str
-    subscription_id: str
+    subscription_id: str = None
     quota_used: int
     quota_limit: int
     is_active: bool
@@ -132,13 +132,18 @@ async def get_current_user_info(
     if current_user.plan:
         quota_limit = current_user.plan.monthly_quota
 
+    # Get subscription ID from first active subscription if exists
+    subscription_id = None
+    if current_user.subscriptions and len(current_user.subscriptions) > 0:
+        subscription_id = current_user.subscriptions[0].id
+
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
         api_key=current_user.api_key,
         plan_id=current_user.plan_id,
-        subscription_id=current_user.subscription_id,
+        subscription_id=subscription_id,
         quota_used=current_user.quota_used,
         quota_limit=quota_limit,
         is_active=current_user.is_active,

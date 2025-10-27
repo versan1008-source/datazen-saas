@@ -26,7 +26,8 @@ class User(Base):
     
     # Subscription info
     plan_id = Column(String(36), ForeignKey("plans.id"), nullable=True)
-    
+    subscription_id = Column(String(36), ForeignKey("subscriptions.id"), nullable=True)
+
     # Usage tracking
     quota_used = Column(Integer, default=0)  # Pages scraped this month
     quota_reset_date = Column(DateTime, nullable=True)
@@ -61,6 +62,7 @@ class User(Base):
             "email": self.email,
             "full_name": self.full_name,
             "plan_id": self.plan_id,
+            "subscription_id": self.subscription_id,
             "quota_used": self.quota_used,
             "quota_limit": quota_limit,
             "quota_reset_date": self.quota_reset_date.isoformat() if self.quota_reset_date else None,

@@ -1,21 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Brain, Globe, Zap, Shield, Download, Github, ArrowRight, Sparkles } from 'lucide-react';
+import { Brain, Globe, Zap, Shield, Download, Github, ArrowRight, Sparkles, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import ScrapeForm from '@/components/ScrapeForm';
 import ResultTable from '@/components/ResultTable';
 import PhoneNumbersTable from '@/components/PhoneNumbersTable';
 import Loader, { ProgressSteps } from '@/components/Loader';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { useAuth } from '@/lib/auth-context';
 import { apiService, ScrapeRequest, EnhancedScrapeRequest, ScrapeResponse } from '@/lib/api';
 
-export default function Home() {
+function HomeContent() {
+  const { user, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ScrapeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [enhancedMode, setEnhancedMode] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const scrapeSteps = enhancedMode ? [
     'Validating URL',
@@ -159,6 +163,48 @@ export default function Home() {
                 >
                   <Github className="w-5 h-5" />
                 </a>
+
+                {/* User Menu */}
+                {user && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800/50 transition-colors text-slate-300 hover:text-cyan-400"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white text-sm font-semibold">
+                        {user.fullName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-medium hidden sm:inline">{user.fullName}</span>
+                    </button>
+
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-48 backdrop-blur-md bg-slate-800/90 border border-slate-700/50 rounded-xl shadow-xl z-50">
+                        <div className="p-4 border-b border-slate-700/50">
+                          <p className="text-sm text-slate-300">{user.email}</p>
+                          <p className="text-xs text-cyan-400 font-semibold mt-1 capitalize">{user.plan} Plan</p>
+                          <p className="text-xs text-slate-400 mt-1">{user.requestsUsed}/{user.requestsLimit} requests</p>
+                        </div>
+                        <Link
+                          href="/billing"
+                          className="block px-4 py-2 text-sm text-slate-300 hover:text-cyan-400 hover:bg-slate-700/50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          Billing & Plans
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -301,5 +347,13 @@ export default function Home() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ProtectedRoute>
+      <HomeContent />
+    </ProtectedRoute>
   );
 }

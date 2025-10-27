@@ -2,9 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, ArrowRight, Brain } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 const LoginPage = () => {
+  const router = useRouter();
+  const { login, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -34,12 +38,11 @@ const LoginPage = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError('Invalid email or password');
+      await login(formData.email, formData.password);
+      // Redirect to home page after successful login
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }

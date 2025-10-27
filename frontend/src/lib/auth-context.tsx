@@ -66,12 +66,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!response.ok) {
-        throw new Error('Login failed');
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
       }
 
       const data = await response.json();
-      localStorage.setItem('authToken', data.token);
-      setUser(data.user);
+      localStorage.setItem('authToken', data.access_token);
+
+      // Transform user data to match our User interface
+      const userData: User = {
+        id: data.user.id,
+        email: data.user.email,
+        fullName: data.user.full_name,
+        plan: (data.user.plan_id || 'free') as 'free' | 'pro' | 'premium',
+        requestsUsed: data.user.quota_used || 0,
+        requestsLimit: data.user.quota_limit || 50,
+        createdAt: data.user.created_at
+      };
+
+      setUser(userData);
     } finally {
       setIsLoading(false);
     }
@@ -80,19 +93,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (fullName: string, email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, password })
+        body: JSON.stringify({ full_name: fullName, email, password })
       });
 
       if (!response.ok) {
-        throw new Error('Signup failed');
+        const error = await response.json();
+        throw new Error(error.detail || 'Signup failed');
       }
 
       const data = await response.json();
-      localStorage.setItem('authToken', data.token);
-      setUser(data.user);
+      localStorage.setItem('authToken', data.access_token);
+
+      // Transform user data to match our User interface
+      const userData: User = {
+        id: data.user.id,
+        email: data.user.email,
+        fullName: data.user.full_name,
+        plan: (data.user.plan_id || 'free') as 'free' | 'pro' | 'premium',
+        requestsUsed: data.user.quota_used || 0,
+        requestsLimit: data.user.quota_limit || 50,
+        createdAt: data.user.created_at
+      };
+
+      setUser(userData);
     } finally {
       setIsLoading(false);
     }

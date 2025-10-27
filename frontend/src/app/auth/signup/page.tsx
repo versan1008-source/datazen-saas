@@ -2,9 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, ArrowRight, Brain } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 const SignupPage = () => {
+  const router = useRouter();
+  const { signup, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -48,12 +52,11 @@ const SignupPage = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      await signup(formData.fullName, formData.email, formData.password);
+      // Redirect to home page after successful signup
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

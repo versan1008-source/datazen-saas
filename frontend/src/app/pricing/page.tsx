@@ -14,10 +14,10 @@ const PricingPage = () => {
       description: 'Perfect for trying out DataZen',
       icon: Gift,
       features: [
-        { name: '500 pages/month', included: true },
+        { name: '10 pages/month', included: true },
         { name: '1 concurrent job', included: true },
         { name: 'Basic data extraction', included: true },
-        { name: 'JSON export', included: true },
+        { name: 'JSON export only', included: true },
         { name: 'Email support', included: true },
         { name: 'CSV export', included: false },
         { name: 'Scheduling', included: false },

@@ -84,7 +84,7 @@ class AuthService:
                 name="Free",
                 description="Free Plan",
                 price_usd=0.00,
-                monthly_quota=500,
+                monthly_quota=10,
                 max_concurrent_jobs=1,
                 max_team_seats=1,
                 features={
@@ -97,7 +97,11 @@ class AuthService:
                     "priority_queue": False,
                     "api_access": False,
                     "basic_extraction": True,
-                    "email_support": True
+                    "advanced_extraction": False,
+                    "enterprise_extraction": False,
+                    "email_support": True,
+                    "priority_email_support": False,
+                    "phone_support_24_7": False
                 }
             )
             db.add(free_plan)

@@ -15,10 +15,10 @@ function BillingContent() {
       name: 'Free',
       price: '$0',
       period: '/month',
-      requests: '500 pages/month',
+      requests: '10 pages/month',
       features: [
         'Basic data extraction',
-        'JSON export',
+        'JSON export only',
         'Email support',
         '1 concurrent job'
       ],
